@@ -26,8 +26,10 @@ app.get("/", async (req, res) => {
   try {
     // await prisma.user.create({
     //   data: {
-    //     firstName:  "Ridhika",
-    //     lastName :  "Joshi"
+    //     firstName:  "Manisha",
+    //     lastName :  "Joshi",
+    //     email: "abc@gmail.com",
+    //     password: "123456",
     //   },
     // });
     res.send("Server Working Fine");
@@ -36,5 +38,10 @@ app.get("/", async (req, res) => {
   }
 });
 
+
+
+import userRouter from "./routes/user.routes";
+
+app.use("/api/v1/users", userRouter);
 
 export default app;
