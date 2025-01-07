@@ -20,4 +20,35 @@ model User {
   email     String   @unique
   password  String  
   createdAt DateTime @default(now())
+  messages    Message[]    // Relation to messages table
+  roomUsers   RoomUser[]   // Relation to roomUsers table
+}
+
+model Room{
+  id String @id @default(uuid())
+  name String
+  createdAt DateTime @default(now())
+  messages    Message[]    // Relation to messages table
+  roomUsers   RoomUser[]   // Relation to roomUsers table
+}
+
+model Message{
+  id String @id @default(uuid())
+  message String
+  roomId String
+  userId Int
+  createdAt DateTime @default(now())
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade) // Foreign key to Room
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade) // Foreign key to User
+}
+
+model RoomUser{
+  id String @id @default(uuid())
+  roomId String
+  userId Int
+  createdAt DateTime @default(now())
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade) // Foreign key to Room
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade) // Foreign key to User
+
+  @@unique([roomId, userId]) // Prevents duplicate user-room associations
 }
