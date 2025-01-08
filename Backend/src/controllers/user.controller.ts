@@ -52,15 +52,30 @@ const registerUser = asyncHandler(async (req, res) => {
   if(!user){
     throw new ApiError(500, "Internal server error");
   }
+  const secret = process.env.ACCESS_TOKEN_SECRET;
+  if (!secret) {
+    throw new ApiError(500, "ACCESS_TOKEN_SECRET is not defined");
+  }
+  const token = jwt.sign({ id: user.id }, secret, {
+    expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+  });
+
+  if (!token) {
+    throw new ApiError(500, "Internal server error");
+  }
 
   // return response
-  const response = new ApiResponse(201, user, "User registered successfully");
+  const response = new ApiResponse(201, {
+    acessToken: token,
+    user: user
+  }, "User registered successfully");
   res.status(201).json(response);
 });
 
 const loginUser= asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-
+  //console.log(email);
+  //console.log(password);
   // validate the request
   if (!email || !password) {
     throw new ApiError(400, "Please provide email and password");
@@ -100,12 +115,12 @@ const loginUser= asyncHandler(async (req, res) => {
   // set cookie
   res.cookie("accessToken", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
+    secure: false,
+    sameSite: "strict",
   });
 
   // return response
-  const response = new ApiResponse(200, { acessToken: token
+  const response = new ApiResponse(200, { acessToken: token,user: user
    }, "User logged in successfully");
   res.status(200).json(response);
 });
