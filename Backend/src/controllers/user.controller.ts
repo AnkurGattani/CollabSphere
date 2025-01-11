@@ -118,9 +118,13 @@ const loginUser= asyncHandler(async (req, res) => {
     secure: false,
     sameSite: "strict",
   });
+  // extract only id email first name and last name to send to the client
+  const newuser = {id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName};
+
+
 
   // return response
-  const response = new ApiResponse(200, { acessToken: token,user: user
+  const response = new ApiResponse(200, { accessToken: token,user: newuser
    }, "User logged in successfully");
   res.status(200).json(response);
 });
