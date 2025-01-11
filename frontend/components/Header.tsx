@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import axios from 'axios'
+import { useAuthStore } from '../store/authStore'
 
 export default function Header() {
-  const [isLogin, setIsLogin] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [firstname, setFirstname] = useState('')
@@ -19,13 +19,18 @@ export default function Header() {
   const [signup, setIsSignup] = useState('Sign Up')
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isSignupOpen, setIsSignupOpen] = useState(false)
+  const isLogin = useAuthStore((state) => state.isLogin)
+  const setIsLogin = useAuthStore((state) => state.setIsLogin)
+  const setToken = useAuthStore((state) => state.setToken)
+  const setUser = useAuthStore((state) => state.setUser)
   const router = useRouter()
+
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
       setIsLogin(true)
     }
-  }, [])
+  }, [setIsLogin])
 
   const handleLogin = async (e: any) => {
     e.preventDefault()
@@ -35,9 +40,12 @@ export default function Header() {
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/users/login`, { email: email, password: password })
       if (response.data.success) {
-        localStorage.setItem('token', response.data.data.acessToken)
-        localStorage.setItem('user', JSON.stringify(response.data.data))
+        const { accessToken, user } = response.data.data
+        localStorage.setItem('token', accessToken)
+        localStorage.setItem('user', JSON.stringify(user))
         setIsLogin(true)
+        setToken(accessToken)
+        setUser(user)
       }
     } catch (error) {
       console.log(error)
@@ -48,16 +56,19 @@ export default function Header() {
     setIsLoginOpen(false)
   }
   
-  const handleSignUp= async (e: any) => {
-    e.preventDefault();
+  const handleSignUp = async (e: any) => {
+    e.preventDefault()
     setIsSignup('Signing up...')
     console.log("firstname: " + firstname + " lastname: " + lastname + " email: " + email + " password: " + password)
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/users/register`, { firstName: firstname, lastName: lastname, email: email, password: password })
       if (response.data.success) {
-        localStorage.setItem('token', response.data.data.acessToken)
-        localStorage.setItem('user', JSON.stringify(response.data.data))
+        const { accessToken, user } = response.data.data
+        localStorage.setItem('token', accessToken)
+        localStorage.setItem('user', JSON.stringify(user))
         setIsLogin(true)
+        setToken(accessToken)
+        setUser(user)
       }
     } catch (error) {
       console.log(error)
@@ -68,14 +79,15 @@ export default function Header() {
     setPassword('')
     setIsSignupOpen(false)
     setIsSignup('Sign Up')
+  }
 
-  };
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    // navigate to home page
-    router.push('/')
     setIsLogin(false)
+    setToken(null)
+    setUser(null)
+    router.push('/')
   }
 
   return (
@@ -159,7 +171,7 @@ export default function Header() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleSignUp} value={signup} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">Sign Up</Button>
+              <Button onClick={handleSignUp} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">{signup}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

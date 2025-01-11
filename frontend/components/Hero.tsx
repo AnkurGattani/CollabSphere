@@ -1,23 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer"
 import { Input } from "@/components/ui/input"
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { useAuthStore } from '../store/authStore'
+import { useWebSocket } from '../context/WebSocketContext'
 
 export default function Hero() {
-  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false)
   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false)
   const [roomId, setRoomId] = useState('')
+  const [createrooms, setCreateRooms] = useState('Create Room');
+  const isLogin = useAuthStore((state) => state.isLogin)
   const router = useRouter()
+  const { ws } = useWebSocket()
 
   const handleJoinRoom = () => {
     if (roomId) {
       router.push(`/${roomId}`)
     }
   }
+
+  const handleCreateRoom = () => {
+    setCreateRooms('Creating Room...');
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'createRoom', userId: useAuthStore.getState().user?.id }))
+    } else {
+      toast.error('WebSocket connection is not open')
+      
+    }
+    setCreateRooms('Create Room');
+  }
+
 
   return (
     <section className="py-20 text-center bg-gradient-to-r from-blue-50 to-white">
@@ -41,27 +59,36 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          <Button onClick={() => setIsCreateRoomOpen(true)} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">Create Room</Button>
-          <Button variant="outline" onClick={() => setIsJoinRoomOpen(true)} className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-300">Join Room</Button>
+          <Button 
+            onClick={()=>
+            {
+              if(!isLogin) {
+                toast.error('Please login first')
+                return
+              }
+              handleCreateRoom();
+            }
+            } 
+            className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300"
+            value={createrooms}
+          >
+            Create Room
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() =>{
+              if(!isLogin) {
+                toast.error('Please login first')
+                return
+              }
+              setIsJoinRoomOpen(true)
+            }} 
+            className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-300"
+          >
+            Join Room
+          </Button>
         </motion.div>
       </motion.div>
-
-      <Drawer open={isCreateRoomOpen} onOpenChange={setIsCreateRoomOpen}>
-        <DrawerContent className="bg-white text-gray-900 border-t border-blue-200">
-          <DrawerHeader>
-            <DrawerTitle>Create a New Room</DrawerTitle>
-            <DrawerDescription>
-              Enter a name for your new room.
-            </DrawerDescription>
-          </DrawerHeader>
-          <div className="p-4 space-y-4">
-            <Input placeholder="Room Name" className="border-navy-300" />
-          </div>
-          <DrawerFooter>
-            <Button onClick={() => setIsCreateRoomOpen(false)} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">Create</Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
 
       <Drawer open={isJoinRoomOpen} onOpenChange={setIsJoinRoomOpen}>
         <DrawerContent className="bg-white text-gray-900 border-t border-blue-200">
@@ -84,6 +111,7 @@ export default function Hero() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
+      <ToastContainer />
     </section>
   )
 }
