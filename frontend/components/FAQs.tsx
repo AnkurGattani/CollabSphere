@@ -48,7 +48,7 @@ export default function FAQs() {
               className="mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ duration: 0.5, delay:  0.1 }}
             >
               <button
                 className="flex justify-between items-center w-full text-left p-4 bg-white rounded-lg focus:outline-none border border-blue-100 hover:border-blue-300 transition-colors duration-300"

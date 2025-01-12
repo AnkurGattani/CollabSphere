@@ -2,13 +2,15 @@
 
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import man from '../public/man.jpg'
+import man2 from '../public/man2.png'
 
 const feedbacks = [
-  { name: 'John Doe', role: 'Project Manager', comment: 'ChatCollab has revolutionized our team communication!', avatar: '/placeholder.svg?height=60&width=60' },
-  { name: 'Jane Smith', role: 'Software Developer', comment: 'The real-time editing feature is a game-changer.', avatar: '/placeholder.svg?height=60&width=60' },
-  { name: 'Mike Johnson', role: 'IT Security Specialist', comment: 'Secure and efficient. Exactly what we needed.', avatar: '/placeholder.svg?height=60&width=60' },
-  { name: 'Emily Brown', role: 'UX Designer', comment: 'Our productivity has skyrocketed since using ChatCollab.', avatar: '/placeholder.svg?height=60&width=60' },
-  { name: 'Alex Lee', role: 'Product Owner', comment: 'The user interface is intuitive and beautiful.', avatar: '/placeholder.svg?height=60&width=60' },
+  { name: 'John Doe', role: 'Project Manager', comment: 'ChatCollab has revolutionized our team communication!', avatar: man },
+  { name: 'Jane Smith', role: 'Software Developer', comment: 'The real-time editing feature is a game-changer.', avatar: man2 },
+  { name: 'Mike Johnson', role: 'IT Security Specialist', comment: 'Secure and efficient. Exactly what we needed.', avatar: man},
+  { name: 'Emily Brown', role: 'UX Designer', comment: 'Our productivity has skyrocketed since using ChatCollab.', avatar: man2 },
+  { name: 'Alex Lee', role: 'Product Owner', comment: 'The user interface is intuitive and beautiful.', avatar: man },
 ]
 
 export default function Feedback() {
@@ -58,7 +60,7 @@ export default function Feedback() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <div className="flex items-center mb-4">
-                <img src={feedback.avatar || "/placeholder.svg"} alt={feedback.name} className="w-12 h-12 rounded-full mr-4" />
+                <img src={typeof feedback.avatar === 'string' ? feedback.avatar : feedback.avatar.src} alt={feedback.name} className="w-12 h-12 rounded-full mr-4" />
                 <div>
                   <h3 className="text-lg font-semibold text-blue-700">{feedback.name}</h3>
                   <p className="text-sm text-gray-600">{feedback.role}</p>

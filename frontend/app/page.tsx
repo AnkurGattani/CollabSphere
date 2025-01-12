@@ -3,6 +3,7 @@ import Hero from '../components/Hero'
 import Features from '../components/Features'
 import Feedback from '../components/Feedback'
 import FAQs from '../components/FAQs'
+import Footer from '../components/Footer'
 import { WebSocketProvider } from '../context/WebSocketContext'
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
         <Features />
         <Feedback />
         <FAQs />
+        <Footer/>
       </main>
     </WebSocketProvider>
   )
