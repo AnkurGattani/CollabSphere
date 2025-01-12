@@ -21,7 +21,7 @@ export default function Hero() {
 
   const handleJoinRoom = () => {
     if (roomId) {
-      router.push(`/${roomId}`)
+      router.push(`/${roomId}`);
     }
   }
 
