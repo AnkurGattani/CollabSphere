@@ -67,6 +67,19 @@ export const handleJoinRoom = async (ws: WebSocket, roomId: string, userId: numb
       }));
       return;
     }
+    // is user already in the room
+    const roomUser = await prisma.roomUser.findFirst({
+      where: {
+        roomId: roomId,
+        userId: userId,
+      },
+    });
+    if(roomUser){
+      return ws.send(JSON.stringify({
+        type: 'joinRoomSuccess',
+        message: 'You are already in the room',
+      }));
+    }
 
     // Add the user to the room
     const response = await prisma.roomUser.create({

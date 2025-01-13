@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import WebSocket, { WebSocketServer } from 'ws';
 import http from 'http';
 import { handleCreateRoom,handleJoinRoom,handleSendMessage } from './routes/chatRoom.routes';
+import messagesRouter from "./routes/message.routes";
 
 const app = express();
 
@@ -108,6 +109,7 @@ app.get("/", (req, res) => {
 import userRouter from "./routes/user.routes";
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/messages", messagesRouter);
 
 const port =process.env.PORT;
 server.listen(port, function() {
