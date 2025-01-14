@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import axios from 'axios'
 import { useAuthStore } from '../store/authStore'
-import { useWebSocket } from '../context/WebSocketContext'
 
 export default function Header() {
   const [email, setEmail] = useState('')
@@ -24,7 +23,6 @@ export default function Header() {
   const setIsLogin = useAuthStore((state) => state.setIsLogin)
   const setToken = useAuthStore((state) => state.setToken)
   const setUser = useAuthStore((state) => state.setUser)
-  const { initializeWebSocket, closeWebSocket } = useWebSocket();
   const router = useRouter()
 
   useEffect(() => {
@@ -48,7 +46,6 @@ export default function Header() {
         setIsLogin(true)
         setToken(accessToken)
         setUser(user)
-        initializeWebSocket(); // Initialize WebSocket connection on login
       }
     } catch (error) {
       console.log(error)
@@ -72,7 +69,6 @@ export default function Header() {
         setIsLogin(true)
         setToken(accessToken)
         setUser(user)
-        initializeWebSocket(); // Initialize WebSocket connection on sign up
       }
     } catch (error) {
       console.log(error)
@@ -91,7 +87,6 @@ export default function Header() {
     setIsLogin(false)
     setToken(null)
     setUser(null)
-    closeWebSocket(); // Close WebSocket connection on logout
     router.push('/')
   }
 

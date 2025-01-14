@@ -9,31 +9,56 @@ import { Input } from "@/components/ui/input"
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useAuthStore } from '../store/authStore'
-import { useWebSocket } from '../context/WebSocketContext'
+import { useSocketStore } from '../store/webSocketStore'
 
 export default function Hero() {
   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false)
   const [roomId, setRoomId] = useState('')
   const [createrooms, setCreateRooms] = useState('Create Room');
   const isLogin = useAuthStore((state) => state.isLogin)
+  const userId = useAuthStore((state) => state.user?.id)
+  const setSocketUrl = useSocketStore((state) => state.setSocketUrl);
+  const socketUrl = useSocketStore((state) => state.socketUrl);
   const router = useRouter()
-  const { ws } = useWebSocket()
 
   const handleJoinRoom = () => {
-    if (roomId) {
-      router.push(`/${roomId}`);
+    if (roomId === '') {
+      toast.error('Room ID is required');
+      return;
     }
+    const socketUrl = `ws://localhost:1234/${roomId}`;
+    const socket = new WebSocket(socketUrl);
+    
+    socket.onopen = () => {
+      console.log(socket);
+      setSocketUrl(socketUrl); // Store the URL instead of the socket object
+      console.log('Connected to room');
+      router.push(`/${roomId}`);
+      // call socket joinRoomById from the backend
+      socket.send(JSON.stringify({ type: 'joinRoomById', roomId, userId }));
+
+    };
+    socket.onerror = () => {
+      toast.error('Failed to connect to room');
+    };
   }
+
+  // Recreate WebSocket connection on page reload
+  useEffect(() => {
+    if (socketUrl && roomId) {
+      const socket = new WebSocket(socketUrl);
+      socket.onopen = () => {
+        console.log('Reconnected to room');
+        // setWs(socket); // Commented out as setWs is not defined
+      };
+      socket.onerror = () => {
+        toast.error('Failed to reconnect to room');
+      };
+    }
+  }, [socketUrl]);
 
   const handleCreateRoom = () => {
     setCreateRooms('Creating Room...');
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: 'createRoom', userId: useAuthStore.getState().user?.id }))
-    } else {
-      toast.error('WebSocket connection is not open')
-      
-    }
-    setCreateRooms('Create Room');
   }
 
 

@@ -1,46 +1,86 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
-import { useWebSocket } from '../context/WebSocketContext';
 import { useAuthStore } from '../store/authStore';
+import { useSocketStore } from '../store/webSocketStore';
+import axios from 'axios';
 
 const CollaborativePage = ({ roomId }: { roomId: string }) => {
-  const { ws, initializeWebSocket } = useWebSocket();
   const user = useAuthStore((state) => state.user);
   const [message, setMessage] = useState('');
-  const [chatMessages, setChatMessages] = useState<{ user: string; text: string }[]>([]);
-  const [isWsReady, setIsWsReady] = useState(false);
+  const [chatMessages, setChatMessages] = useState<{ id: string; user: string; text: string }[]>([]);
+  const { socketUrl, setSocketUrl } = useSocketStore();
+  const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    const socket = initializeWebSocket();
-    socket.onopen = () => {
-      setIsWsReady(true);
-    };
-    socket.onclose = () => {
-      setIsWsReady(false);
-    };
-    socket.onmessage = (message) => {
-      const data = JSON.parse(message.data);
-      setChatMessages((prevMessages) => [...prevMessages, { user: data.user, text: data.text }]);
-    };
-
-    return () => {
-      socket.close();
-    };
-  }, [initializeWebSocket]);
-
-  const handleSendMessage = async () => {
-    const socket = await initializeWebSocket();
-    if (!user) {
-      console.error('User is not authenticated');
-      return;
+    if (!socketUrl && roomId) {
+      const newSocketUrl = `ws://localhost:1234/${roomId}`;
+      setSocketUrl(newSocketUrl);
     }
-    if (ws && isWsReady) {
-      const chatMessage = { type: 'sendMessage', userId: user.id, text: message, roomId };
-      ws.send(JSON.stringify(chatMessage));
+  }, [roomId, socketUrl, setSocketUrl]);
+
+  useEffect(() => {
+    // Fetch initial messages from the database
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/messages?roomId=${roomId}`);
+        if (Array.isArray(response.data)) {
+          setChatMessages(response.data.map((msg: any) => ({ id: msg.id, user: msg.userId, text: msg.message })));
+        } else {
+          console.error('Unexpected response format:', response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch messages:', error);
+      }
+    };
+
+    fetchMessages();
+  }, [roomId]);
+
+  useEffect(() => {
+    if (socketUrl ) {
+      const newSocket = new WebSocket(socketUrl);
+      setSocket(newSocket);
+
+      newSocket.onopen = () => {
+        console.log('WebSocket connection established');
+      };
+
+      newSocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'receiveMessage') {
+          setChatMessages((prevMessages) => {
+            // Check if the message already exists
+            if (!prevMessages.some(msg => msg.id === data.message.id)) {
+              return [...prevMessages, { id: data.message.id, user: data.message.userId, text: data.message.text }];
+            }
+              return prevMessages;
+            });
+          }
+        };
+      
+
+      newSocket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      newSocket.onclose = () => {
+        console.log('WebSocket connection closed');
+        newSocket.close();
+      };
+
+      // return () => {
+      //   newSocket.close();
+      // };
+    }
+  }, [socketUrl]);
+
+  const handleSendMessage = () => {
+    if (socket && message.trim() !== '') {
+      const chatMessage = { type: 'sendMessage', roomId, userId: user?.id, text: message };
+      socket.send(JSON.stringify(chatMessage));
+      //setChatMessages((prevMessages) => [...prevMessages, { id: `${Date.now()}`, user: user?.id?.toString() || 'Anonymous', text: message }]);
       setMessage('');
-    } else {
-      console.error('WebSocket is not ready or not open');
     }
   };
 
