@@ -5,6 +5,7 @@ import WebSocket, { WebSocketServer } from 'ws';
 import http from 'http';
 import { handleCreateRoom,handleJoinRoom,handleSendMessage } from './routes/chatRoom.routes';
 import messagesRouter from "./routes/message.routes";
+import roomRouter from "./routes/room.routes";
 
 const app = express();
 
@@ -110,6 +111,7 @@ import userRouter from "./routes/user.routes";
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/messages", messagesRouter);
+app.use("/api/v1/rooms", roomRouter);
 
 const port =process.env.PORT;
 server.listen(port, function() {
