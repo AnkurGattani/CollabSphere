@@ -51,7 +51,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
         if (data.type === 'receiveMessage') {
           setChatMessages((prevMessages) => {
             // Check if the message already exists
-            if (!prevMessages.some(msg => msg.id === data.message.id)) {
+            if (!prevMessages.some(msg => msg.id === data.message.id) && data.message.roomId === roomId) {
               return [...prevMessages, { id: data.message.id, user: data.message.userId, text: data.message.text }];
             }
               return prevMessages;

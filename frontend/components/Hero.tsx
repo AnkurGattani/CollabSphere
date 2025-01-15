@@ -10,6 +10,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useAuthStore } from '../store/authStore'
 import { useSocketStore } from '../store/webSocketStore'
+import axios from 'axios'
 
 export default function Hero() {
   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false)
@@ -21,21 +22,22 @@ export default function Hero() {
   const socketUrl = useSocketStore((state) => state.socketUrl);
   const router = useRouter()
 
-  const handleJoinRoom = () => {
-    if (roomId === '') {
+  const handleJoinRoom = (newRoomId?: string) => {
+    const roomToJoin = newRoomId || roomId;
+    if (roomToJoin === '') {
       toast.error('Room ID is required');
       return;
     }
-    const socketUrl = `ws://localhost:1234/${roomId}`;
+    const socketUrl = `ws://localhost:1234/${roomToJoin}`;
     const socket = new WebSocket(socketUrl);
     
     socket.onopen = () => {
       console.log(socket);
       setSocketUrl(socketUrl); // Store the URL instead of the socket object
       console.log('Connected to room');
-      router.push(`/${roomId}`);
+      router.push(`/${roomToJoin}`);
       // call socket joinRoomById from the backend
-      socket.send(JSON.stringify({ type: 'joinRoomById', roomId, userId }));
+      socket.send(JSON.stringify({ type: 'joinRoomById', roomId:roomToJoin, userId }));
 
     };
     socket.onerror = () => {
@@ -57,8 +59,19 @@ export default function Hero() {
     }
   }, [socketUrl]);
 
-  const handleCreateRoom = () => {
-    setCreateRooms('Creating Room...');
+  const handleCreateRoom = async() => {
+    // axios post request to create room
+    try{
+      const response=await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/rooms/create`,{
+        userId:userId
+      });
+      console.log(response.data.roomId);
+      setRoomId(response.data.roomId);
+      handleJoinRoom(response.data.roomId);
+    }catch(error){
+      console.log(error);
+      toast.error('Failed to create room');
+    } 
   }
 
 
@@ -132,7 +145,7 @@ export default function Hero() {
             />
           </div>
           <DrawerFooter>
-            <Button onClick={handleJoinRoom} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">Join</Button>
+            <Button onClick={() => handleJoinRoom()} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">Join</Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
