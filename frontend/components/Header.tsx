@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
@@ -49,6 +50,8 @@ export default function Header() {
       }
     } catch (error) {
       console.log(error)
+      setIsLogin(false);
+    
     }
     setEmail('')
     setPassword('')
@@ -69,9 +72,12 @@ export default function Header() {
         setIsLogin(true)
         setToken(accessToken)
         setUser(user)
+       
       }
     } catch (error) {
       console.log(error)
+      setIsLogin(false);
+     
     }
     setFirstname('')
     setLastname('')
@@ -90,6 +96,10 @@ export default function Header() {
     router.push('/')
   }
 
+  const handleUpgrade = () => {
+    router.push('/pricing')
+  }
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -50 }}
@@ -102,7 +112,8 @@ export default function Header() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <h1 className="text-2xl font-bold text-navy-900">CollabSphere</h1>
+          <Link href="/"><h1 className="text-2xl font-bold text-navy-900">CollabSphere</h1></Link>
+       
         </motion.div>
         <div className="space-x-4">
           {!isLogin && (
@@ -112,7 +123,10 @@ export default function Header() {
             </>
           )}
           {isLogin && (
-            <Button onClick={handleLogout} className="bg-red-500 text-white hover:bg-red-600 transition-all duration-300">Logout</Button>
+            <>
+              <Button onClick={handleUpgrade} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">Upgrade</Button>
+              <Button onClick={handleLogout} className="bg-red-500 text-white hover:bg-red-600 transition-all duration-300">Logout</Button>
+            </>
           )}
         </div>
       </nav>
@@ -176,7 +190,7 @@ export default function Header() {
           </DialogContent>
         </Dialog>
       )}
+      
     </motion.header>
   )
 }
-
