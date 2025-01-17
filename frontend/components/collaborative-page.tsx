@@ -4,6 +4,9 @@ import Header from './Header';
 import { useAuthStore } from '../store/authStore';
 import { useSocketStore } from '../store/webSocketStore';
 import axios from 'axios';
+import { EditorComponent } from './editor';
+import {Room} from './room';
+import {Toolbar} from './toolbar';
 
 const CollaborativePage = ({ roomId }: { roomId: string }) => {
   const user = useAuthStore((state) => state.user);
@@ -85,16 +88,16 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white text-gray-800">
+    <div className="flex flex-col min-h-screen bg-white text-gray-800 overflow-auto">
       <Header />
       <div className="flex flex-col md:flex-row flex-grow overflow-hidden p-4 sm:p-6 lg:p-8 space-y-4 md:space-y-0 md:space-x-4">
         {/* Editor Section */}
         <div className="w-full md:w-3/4 flex flex-col">
           <div className="bg-gray-100 rounded-lg flex-grow p-4">
-            <textarea
-              className="w-full h-full p-3 bg-white border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
-              placeholder={`Start collaborating in room ${roomId}...`}
-            ></textarea>
+            <Toolbar/>
+            <Room>
+              <EditorComponent />
+            </Room>
           </div>
         </div>
 
