@@ -7,6 +7,7 @@ import axios from 'axios';
 import { EditorComponent } from './editor';
 import {Room} from './room';
 import {Toolbar} from './toolbar';
+import Footer from './Footer';
 
 const CollaborativePage = ({ roomId }: { roomId: string }) => {
   const user = useAuthStore((state) => state.user);
@@ -14,6 +15,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
   const [chatMessages, setChatMessages] = useState<{ id: string; user: string; text: string }[]>([]);
   const { socketUrl, setSocketUrl } = useSocketStore();
   const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     if (!socketUrl && roomId) {
@@ -87,10 +89,38 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
     }
   };
 
+  const handleCopyRoomId = () => {
+    navigator.clipboard.writeText(roomId).then(() => {
+       setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 3000); // Reset after 2 seconds
+    }).catch((err) => {
+      console.error('Failed to copy room ID: ', err);
+    });
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800 overflow-auto">
       <Header />
+        {/* Room ID Section */}
+      <div className="flex justify-center items-center space-x-2 mb-4 mt-5">
+      <input
+        type="text"
+        value={roomId}
+        readOnly
+        className="p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-72"
+      />
+     <button
+          className={`px-3 py-2 rounded-md transition duration-300 ease-in-out text-sm ${
+            copySuccess ? 'bg-green-500 hover:bg-green-600' : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
+          }`}
+          onClick={handleCopyRoomId}
+        >
+          {copySuccess ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
       <div className="flex flex-col md:flex-row flex-grow overflow-hidden p-4 sm:p-6 lg:p-8 space-y-4 md:space-y-0 md:space-x-4">
+          
+
         {/* Editor Section */}
         <div className="w-full md:w-3/4 flex flex-col">
           <div className="bg-gray-100 rounded-lg flex-grow p-4">
@@ -127,6 +157,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 };
