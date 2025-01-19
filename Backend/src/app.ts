@@ -6,6 +6,7 @@ import http from 'http';
 import { handleCreateRoom,handleJoinRoom,handleSendMessage } from './routes/chatRoom.routes';
 import messagesRouter from "./routes/message.routes";
 import roomRouter from "./routes/room.routes";
+import aiTextCompletionRouter from "./routes/huggingface.route";
 
 const app = express();
 
@@ -112,6 +113,7 @@ import userRouter from "./routes/user.routes";
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/messages", messagesRouter);
 app.use("/api/v1/rooms", roomRouter);
+app.use("/api/v1/ai",aiTextCompletionRouter);
 
 const port =process.env.PORT;
 server.listen(port, function() {
