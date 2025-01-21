@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import man from '../public/man.jpg'
 import man2 from '../public/man2.png'
 
@@ -60,13 +61,13 @@ export default function Feedback() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <div className="flex items-center mb-4">
-                <img src={typeof feedback.avatar === 'string' ? feedback.avatar : feedback.avatar.src} alt={feedback.name} className="w-12 h-12 rounded-full mr-4" />
+                <Image src={feedback.avatar} alt={feedback.name} className="w-12 h-12 rounded-full mr-4" />
                 <div>
                   <h3 className="text-lg font-semibold text-blue-700">{feedback.name}</h3>
                   <p className="text-sm text-gray-600">{feedback.role}</p>
                 </div>
               </div>
-              <p className="text-gray-700 italic">"{feedback.comment}"</p>
+              <p className="text-gray-700 italic">&ldquo;{feedback.comment}&rdquo;</p>
             </motion.div>
           ))}
         </div>

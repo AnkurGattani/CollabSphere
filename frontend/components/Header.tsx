@@ -33,7 +33,7 @@ export default function Header() {
     }
   }, [setIsLogin])
 
-  const handleLogin = async (e: any) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLogin('Logging in...')
 
@@ -59,7 +59,7 @@ export default function Header() {
     setIsLoginOpen(false)
   }
   
-  const handleSignUp = async (e: any) => {
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSignup('Signing up...')
     console.log("firstname: " + firstname + " lastname: " + lastname + " email: " + email + " password: " + password)
@@ -140,7 +140,7 @@ export default function Header() {
                 Enter your credentials to log in.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="border-navy-300" />
@@ -149,10 +149,10 @@ export default function Header() {
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} className="border-navy-300" />
               </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={handleLogin} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">{login}</Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type="submit" className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">{login}</Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       )}
@@ -184,9 +184,27 @@ export default function Header() {
                 <Input id="password" type="password" placeholder="Choose a password" value={password} onChange={(e)=>setPassword(e.target.value)} className="border-navy-300" />
               </div>
             </div>
-            <DialogFooter>
-              <Button onClick={handleSignUp} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">{signup}</Button>
-            </DialogFooter>
+            <form onSubmit={handleSignUp} className="space-y-4">
+              <div>
+                <Label htmlFor="name">First Name</Label>
+                <Input id="name" placeholder="Enter your first name" value={firstname} onChange={(e)=>setFirstname(e.target.value)} className="border-navy-300" />
+              </div>
+              <div>
+                <Label htmlFor="name">Last Name</Label>
+                <Input id="name" placeholder="Enter your last name" value={lastname} onChange={(e)=>setLastname(e.target.value)} className="border-navy-300" />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e)=>setEmail(e.target.value)} className="border-navy-300" />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" placeholder="Choose a password" value={password} onChange={(e)=>setPassword(e.target.value)} className="border-navy-300" />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">{signup}</Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       )}

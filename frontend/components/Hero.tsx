@@ -61,6 +61,7 @@ export default function Hero() {
 
   const handleCreateRoom = async() => {
     // axios post request to create room
+    setCreateRooms('Creating Room...');
     try{
       const response=await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/rooms/create`,{
         userId:userId
@@ -72,6 +73,7 @@ export default function Hero() {
       console.log(error);
       toast.error('Failed to create room');
     } 
+    setCreateRooms('Create Room');
   }
 
 

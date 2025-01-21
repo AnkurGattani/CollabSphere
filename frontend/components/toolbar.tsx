@@ -8,8 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { 
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuTrigger,
-    DropdownMenuItem
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { type Level } from "@tiptap/extension-heading";
 

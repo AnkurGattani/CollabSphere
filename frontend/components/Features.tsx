@@ -40,7 +40,7 @@ const features = [
 
 
 function FeatureItem({ feature, index, controls }: { feature: any, index: number, controls: AnimationControls }) {
-  const ref = useRef(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(

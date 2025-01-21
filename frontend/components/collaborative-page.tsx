@@ -5,8 +5,8 @@ import { useAuthStore } from '../store/authStore';
 import { useSocketStore } from '../store/webSocketStore';
 import axios from 'axios';
 import { EditorComponent } from './editor';
-import {Room} from './room';
-import {Toolbar} from './toolbar';
+import { Room } from './room';
+import { Toolbar } from './toolbar';
 import Footer from './Footer';
 
 const CollaborativePage = ({ roomId }: { roomId: string }) => {
@@ -30,7 +30,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/messages?roomId=${roomId}`);
         if (Array.isArray(response.data)) {
-          setChatMessages(response.data.map((msg: any) => ({ id: msg.id, user: msg.userId, text: msg.message })));
+          setChatMessages(response.data.map((msg: { id: string; userId: string; message: string }) => ({ id: msg.id, user: msg.userId, text: msg.message })));
         } else {
           console.error('Unexpected response format:', response.data);
         }
@@ -43,7 +43,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
   }, [roomId]);
 
   useEffect(() => {
-    if (socketUrl ) {
+    if (socketUrl) {
       const newSocket = new WebSocket(socketUrl);
       setSocket(newSocket);
 
@@ -59,11 +59,10 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
             if (!prevMessages.some(msg => msg.id === data.message.id) && data.message.roomId === roomId) {
               return [...prevMessages, { id: data.message.id, user: data.message.userId, text: data.message.text }];
             }
-              return prevMessages;
-            });
-          }
-        };
-      
+            return prevMessages;
+          });
+        }
+      };
 
       newSocket.onerror = (error) => {
         console.error('WebSocket error:', error);
@@ -78,7 +77,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
       //   newSocket.close();
       // };
     }
-  }, [socketUrl]);
+  }, [socketUrl, roomId]);
 
   const handleSendMessage = () => {
     if (socket && message.trim() !== '') {
@@ -91,7 +90,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
 
   const handleCopyRoomId = () => {
     navigator.clipboard.writeText(roomId).then(() => {
-       setCopySuccess(true);
+      setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 3000); // Reset after 2 seconds
     }).catch((err) => {
       console.error('Failed to copy room ID: ', err);
@@ -101,15 +100,15 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800 overflow-auto">
       <Header />
-        {/* Room ID Section */}
+      {/* Room ID Section */}
       <div className="flex justify-center items-center space-x-2 mb-4 mt-5">
-      <input
-        type="text"
-        value={roomId}
-        readOnly
-        className="p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-72"
-      />
-     <button
+        <input
+          type="text"
+          value={roomId}
+          readOnly
+          className="p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-72"
+        />
+        <button
           className={`px-3 py-2 rounded-md transition duration-300 ease-in-out text-sm ${
             copySuccess ? 'bg-green-500 hover:bg-green-600' : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
           }`}
@@ -119,12 +118,10 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
         </button>
       </div>
       <div className="flex flex-col md:flex-row flex-grow overflow-hidden p-4 sm:p-6 lg:p-8 space-y-4 md:space-y-0 md:space-x-4">
-          
-
         {/* Editor Section */}
         <div className="w-full md:w-3/4 flex flex-col">
           <div className="bg-gray-100 rounded-lg flex-grow p-4">
-            <Toolbar/>
+            <Toolbar />
             <Room>
               <EditorComponent />
             </Room>
@@ -157,7 +154,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
           </div>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };
