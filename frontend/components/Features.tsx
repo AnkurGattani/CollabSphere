@@ -4,6 +4,7 @@ import { motion, useAnimation } from 'framer-motion'
 import { MessageSquare, Edit, Users, Lock } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useRef } from 'react'
+import type { StaticImageData } from 'next/image'
 import { AnimationControls } from 'framer-motion'
 import chat from "../public/Chat.jpg"
 import multiple_people from "../public/multiple_people.jpg"
@@ -15,7 +16,7 @@ const features = [
     icon: MessageSquare,
     title: 'Real-Time Chat',
     description: 'Experience seamless communication with our instant messaging feature. Connect with your team in real-time, share ideas, and make decisions faster than ever before.',
-    image:chat
+    image: chat
   },
   {
     icon: Edit,
@@ -37,9 +38,14 @@ const features = [
   },
 ]
 
+interface Feature {
+  icon: React.ComponentType<{ className?: string }>,
+  title: string,
+  description: string,
+  image: StaticImageData
+}
 
-
-function FeatureItem({ feature, index, controls }: { feature: any, index: number, controls: AnimationControls }) {
+function FeatureItem({ feature, index, controls }: { feature: Feature, index: number, controls: AnimationControls }) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
