@@ -28,7 +28,7 @@ export default function Hero() {
       toast.error('Room ID is required');
       return;
     }
-    const socketUrl = `ws://localhost:1234/${roomToJoin}`;
+    const socketUrl = `ws://collabsphere-backend.ridhikajoshi.me/${roomToJoin}`;
     const socket = new WebSocket(socketUrl);
     
     socket.onopen = () => {

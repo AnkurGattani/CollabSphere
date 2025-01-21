@@ -19,7 +19,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
 
   useEffect(() => {
     if (!socketUrl && roomId) {
-      const newSocketUrl = `ws://localhost:1234/${roomId}`;
+      const newSocketUrl = `ws://collabsphere-backend.ridhikajoshi.me/${roomId}`;
       setSocketUrl(newSocketUrl);
     }
   }, [roomId, socketUrl, setSocketUrl]);
