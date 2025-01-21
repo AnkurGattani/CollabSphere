@@ -115,7 +115,7 @@ app.use("/api/v1/messages", messagesRouter);
 app.use("/api/v1/rooms", roomRouter);
 app.use("/api/v1/ai",aiTextCompletionRouter);
 
-const port =process.env.PORT;
+const port =process.env.PORT || 1234;
 server.listen(port, function() {
     console.log((new Date()) +  `Server is listening on port ${port}`);
 });
