@@ -16,6 +16,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
   const { socketUrl, setSocketUrl } = useSocketStore();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!socketUrl && roomId) {
@@ -97,11 +98,28 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
     });
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000); // Simulate loading time
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="loader"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800 overflow-auto">
       <Header />
       {/* Room ID Section */}
       <div className="flex justify-center items-center space-x-2 mb-4 mt-5">
+      <label className="text-sm font-bold text-gray-700">Room ID:</label>
         <input
           type="text"
           value={roomId}
