@@ -22,6 +22,7 @@ model User {
   createdAt DateTime @default(now())
   messages    Message[]    // Relation to messages table
   roomUsers   RoomUser[]   // Relation to roomUsers table
+  aiChats    AIChat[] // Relation to AIChat table
 }
 
 model Room{
@@ -51,4 +52,15 @@ model RoomUser{
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade) // Foreign key to User
 
   @@unique([roomId, userId]) // Prevents duplicate user-room associations
+}
+
+model AIChat {
+  chatId     String    @id @default(uuid())
+  chatName  String
+  userId     Int
+  messages   Json      // Storing messages as JSON array
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade) // Foreign key to User
+
+  @@unique([chatId, userId]) // Unique constraint on chatId and userId
 }
