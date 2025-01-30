@@ -3,10 +3,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import WebSocket, { WebSocketServer } from 'ws';
 import http from 'http';
-import { handleCreateRoom,handleJoinRoom,handleSendMessage } from './routes/chatRoom.routes';
+import { handleCreateRoom, handleJoinRoom, handleSendMessage } from './routes/chatRoom.routes';
 import messagesRouter from "./routes/message.routes";
 import roomRouter from "./routes/room.routes";
 import aiTextCompletionRouter from "./routes/huggingface.route";
+import { verifyJWT } from "./middlewares/auth.middleware";
 
 const app = express();
 
@@ -36,17 +37,17 @@ wss.on('connection', function connection(ws) {
 
   ws.on('message', async function message(data) {
     try {
-     // Convert RawData to string
-    const dataString = data.toString();
+      // Convert RawData to string
+      const dataString = data.toString();
 
-    // Parse the string as JSON
-    const parsedData:{
-      type: string;
-      userId: number;
-      roomId?: string;
-      text?: string;
-    } = JSON.parse(dataString);
-  
+      // Parse the string as JSON
+      const parsedData: {
+        type: string;
+        userId: number;
+        roomId?: string;
+        text?: string;
+      } = JSON.parse(dataString);
+
       // Check for required fields
       if (!parsedData.type || !parsedData.userId) {
         ws.send(JSON.stringify({
@@ -55,16 +56,16 @@ wss.on('connection', function connection(ws) {
         }));
         return;
       }
-  
+
       // Handle message types
       switch (parsedData.type) {
         case 'createRoom':
           handleCreateRoom(ws, parsedData.userId); // Call the create room handler
           break;
-  
+
         case 'joinRoomById':
           if (parsedData.roomId) {
-            await handleJoinRoom(ws , parsedData.roomId, parsedData.userId); // Call the join room handler
+            await handleJoinRoom(ws, parsedData.roomId, parsedData.userId); // Call the join room handler
           } else {
             ws.send(JSON.stringify({
               type: 'error',
@@ -74,17 +75,16 @@ wss.on('connection', function connection(ws) {
           break;
 
         case 'sendMessage':
-            if (parsedData.roomId && parsedData.text) {
-              await handleSendMessage(wss, parsedData.roomId, parsedData.userId, parsedData.text); // Call the send message handler
-            } else {
-              ws.send(JSON.stringify({
-                type: 'error',
-                message: 'Invalid message format: "roomId" and "text" are required for sendMessage.',
-              }));
-            }
-            break;
+          if (parsedData.roomId && parsedData.text) {
+            await handleSendMessage(wss, parsedData.roomId, parsedData.userId, parsedData.text); // Call the send message handler
+          } else {
+            ws.send(JSON.stringify({
+              type: 'error',
+              message: 'Invalid message format: "roomId" and "text" are required for sendMessage.',
+            }));
+          }
+          break;
 
-            
         default:
           ws.send(JSON.stringify({
             type: 'error',
@@ -102,7 +102,6 @@ wss.on('connection', function connection(ws) {
   });
 });
 
-
 app.get("/", (req, res) => {
   res.send("Server Working Fine");
 });
@@ -113,12 +112,11 @@ import userRouter from "./routes/user.routes";
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/messages", messagesRouter);
 app.use("/api/v1/rooms", roomRouter);
-app.use("/api/v1/ai",aiTextCompletionRouter);
+app.use("/api/v1/ai", verifyJWT, aiTextCompletionRouter);
 
-const port =process.env.PORT || 1234;
-server.listen(port, function() {
-    console.log((new Date()) +  `Server is listening on port ${port}`);
+const port = process.env.PORT || 1234;
+server.listen(port, function () {
+  console.log((new Date()) + `Server is listening on port ${port}`);
 });
-
 
 export default app;
