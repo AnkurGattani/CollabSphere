@@ -23,6 +23,7 @@ export default function Header() {
   const isLogin = useAuthStore((state) => state.isLogin)
   const setIsLogin = useAuthStore((state) => state.setIsLogin)
   const setToken = useAuthStore((state) => state.setToken)
+  const token = useAuthStore((state) => state.token)
   const setUser = useAuthStore((state) => state.setUser)
   const router = useRouter()
 
@@ -37,11 +38,13 @@ export default function Header() {
     e.preventDefault()
     setLogin('Logging in...')
 
-    console.log("email: " + email + " password: " + password)
+    //console.log("email: " + email + " password: " + password)
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/users/login`, { email: email, password: password })
+     // console.log(response.data)
       if (response.data.success) {
-        const { accessToken, user } = response.data.data
+        const { accessToken, user } = response.data.data;
+        //console.log("token: " + accessToken + " user: " + JSON.stringify(user))
         localStorage.setItem('token', accessToken)
         localStorage.setItem('user', JSON.stringify(user))
         setIsLogin(true)
@@ -166,24 +169,6 @@ export default function Header() {
                 Create a new account to get started.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">First Name</Label>
-                <Input id="name" placeholder="Enter your first name" value={firstname} onChange={(e)=>setFirstname(e.target.value)} className="border-navy-300" />
-              </div>
-              <div>
-                <Label htmlFor="name">Last Name</Label>
-                <Input id="name" placeholder="Enter your last name" value={lastname} onChange={(e)=>setLastname(e.target.value)} className="border-navy-300" />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e)=>setEmail(e.target.value)} className="border-navy-300" />
-              </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="Choose a password" value={password} onChange={(e)=>setPassword(e.target.value)} className="border-navy-300" />
-              </div>
-            </div>
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
                 <Label htmlFor="name">First Name</Label>

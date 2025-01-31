@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { useAuthStore } from '../store/authStore'
 import { useSocketStore } from '../store/webSocketStore'
 import axios from 'axios'
+import { v4 as uuidv4 } from 'uuid'
 
 export default function Hero() {
   const [isJoinRoomOpen, setIsJoinRoomOpen] = useState(false)
@@ -22,26 +23,34 @@ export default function Hero() {
   const socketUrl = useSocketStore((state) => state.socketUrl);
   const router = useRouter()
 
+
   const handleJoinRoom = (newRoomId?: string) => {
     const roomToJoin = newRoomId || roomId;
     if (roomToJoin === '') {
       toast.error('Room ID is required');
       return;
     }
-    const socketUrl = `wss://collabsphere-backend.ridhikajoshi.me/${roomToJoin}`;
+    const socketUrl = `wss://collabsphere-backend.ridhikajoshi.me//${roomToJoin}`;
     const socket = new WebSocket(socketUrl);
-    
+
     socket.onopen = () => {
       console.log(socket);
       setSocketUrl(socketUrl); // Store the URL instead of the socket object
       console.log('Connected to room');
       router.push(`/${roomToJoin}`);
       // call socket joinRoomById from the backend
-      socket.send(JSON.stringify({ type: 'joinRoomById', roomId:roomToJoin, userId }));
+      socket.send(JSON.stringify({ type: 'joinRoomById', roomId: roomToJoin, userId }));
 
+      
     };
+
     socket.onerror = () => {
       toast.error('Failed to connect to room');
+    };
+
+    socket.onclose = () => {
+      console.log('WebSocket connection closed');
+      
     };
   }
 
@@ -49,12 +58,20 @@ export default function Hero() {
   useEffect(() => {
     if (socketUrl && roomId) {
       const socket = new WebSocket(socketUrl);
+     
+
       socket.onopen = () => {
         console.log('Reconnected to room');
         // setWs(socket); // Commented out as setWs is not defined
       };
+
       socket.onerror = () => {
         toast.error('Failed to reconnect to room');
+      };
+
+      socket.onclose = () => {
+        console.log('WebSocket connection closed');
+        
       };
     }
   }, [socketUrl]);
@@ -74,6 +91,13 @@ export default function Hero() {
       toast.error('Failed to create room');
     } 
     setCreateRooms('Create Room');
+  }
+
+
+  const handleAIChatRoom = async() => {
+    // axios post request to create room
+    const chatId = uuidv4();
+      router.push(`/ai/chatroom/${chatId}`);
   }
 
 
@@ -126,6 +150,19 @@ export default function Hero() {
             className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-300"
           >
             Join Room
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() =>{
+              if(!isLogin) {
+                toast.error('Please login first')
+                return
+              }
+              handleAIChatRoom();
+            }} 
+            className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-300"
+          >
+           AI ChatRoom
           </Button>
         </motion.div>
       </motion.div>

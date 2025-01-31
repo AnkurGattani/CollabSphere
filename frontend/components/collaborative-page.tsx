@@ -101,7 +101,7 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 3000); // Simulate loading time
+    }, 4000); // Simulate loading time
 
     return () => clearTimeout(timer);
   }, []);
