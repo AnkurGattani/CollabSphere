@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import "@liveblocks/react-ui/styles.css";       // collaborative styles
+import "@liveblocks/react-tiptap/styles.css";
 import "./globals.css";
 
 const geistSans = Geist({
