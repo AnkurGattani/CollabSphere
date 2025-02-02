@@ -21,11 +21,14 @@ import { FontSizeExtension } from '@/extensions/font-size';
 import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
 import { Threads } from "./threads";
 
+interface EditorProps {
+    initialContent?: string | undefined;
+  };
+  
 
-
-export const EditorComponent = () => {
+export const EditorComponent = ({ initialContent }: EditorProps) => {
     const { setEditor } = useEditorStore();
-    const liveblocks = useLiveblocksExtension();
+    const liveblocks = useLiveblocksExtension({initialContent, offlineSupport_experimental: true});
 
     const editor = useEditor({
         onCreate({ editor }) {
@@ -93,6 +96,7 @@ export const EditorComponent = () => {
           </tr>
         </tbody>
       </table>`,
+      immediatelyRender: false, // to prevent rendering the editor immediately (resolve hydration error)
     })
     
     return (
