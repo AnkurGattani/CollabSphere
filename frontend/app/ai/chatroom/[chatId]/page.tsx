@@ -9,7 +9,9 @@ export default function Chatroom() {
         return null; // or handle the error appropriately
     }
     
+    const createdAt = new Date().toISOString(); // or fetch the actual createdAt value
+
     return (
-        <ChatPage chatId={chatId}/>
+        <ChatPage chatId={chatId} createdAt={createdAt}/>
     );
 }
