@@ -1,5 +1,4 @@
 import { Liveblocks } from '@liveblocks/node';
-import { useAuthStore } from '../../../store/authStore';
 
 const liveblocks = new Liveblocks({
     secret: process.env.LIVEBLOCKS_SECRET_KEY!,

@@ -23,7 +23,6 @@ export default function Header() {
   const isLogin = useAuthStore((state) => state.isLogin)
   const setIsLogin = useAuthStore((state) => state.setIsLogin)
   const setToken = useAuthStore((state) => state.setToken)
-  const token = useAuthStore((state) => state.token)
   const setUser = useAuthStore((state) => state.setUser)
   const router = useRouter()
 
