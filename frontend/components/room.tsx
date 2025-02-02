@@ -7,13 +7,29 @@ import {
   ClientSideSuspense,
 } from "@liveblocks/react/suspense";
 import { useParams } from "next/navigation";
+import axios from "axios";
 
 export function Room({ children }: { children: ReactNode }) {
 
-    const params = useParams();
+  const params = useParams();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const authEndpoint = async (room?: string) => {
+    const response = await axios.post('/api/liveblocks-auth', {
+      user,
+      room , 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // data: JSON.stringify({ user, room }), // Include user and room in the request body
+
+  });
+
+    return response.data;
+  };
 
   return (
-    <LiveblocksProvider publicApiKey={"pk_dev_l61Ynaf3nSewQoHlLLKuTs_ARBskKnE8W8IKgqWfIfn9bQpuNdFT9Eni7oH9t2tI"}>
+    <LiveblocksProvider authEndpoint={authEndpoint} throttle={16}>
       <RoomProvider id={params.roomId as string}> {/* The documentId is the unique identifier for the room and should be same as [documentId] folder name*/}
         <ClientSideSuspense fallback={<div>Loading…</div>}>
           {children}

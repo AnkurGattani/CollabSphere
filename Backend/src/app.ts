@@ -15,6 +15,7 @@ const server = http.createServer(app);
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
+    // origin: '*', // Allow all origins
     credentials: true,
   })
 );
