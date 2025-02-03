@@ -10,7 +10,7 @@ router.route("/save").post(async (req, res) => {
     const { chatId, userId, userMessage, botMessage } = req.body;
 
     // Fetch the existing chat
-    const existingChat = await prisma.aIChat.findUnique({
+    const existingChat = await prisma.aiChat.findUnique({
       where: { chatId },
     });
 
@@ -25,7 +25,7 @@ router.route("/save").post(async (req, res) => {
         { role: 'user', message: userMessage },
         { role: 'ai', message: botMessage },
       ];
-      const updatedChat = await prisma.aIChat.update({
+      const updatedChat = await prisma.aiChat.update({
         where: { chatId },
         data: {
           messages: updatedMessages,
@@ -38,7 +38,7 @@ router.route("/save").post(async (req, res) => {
         { role: 'user', message: userMessage },
         { role: 'ai', message: botMessage },
       ];
-      const newChat = await prisma.aIChat.create({
+      const newChat = await prisma.aiChat.create({
         data: {
           chatId,
           // chat name will be the first user message
@@ -59,7 +59,7 @@ router.route("/save").post(async (req, res) => {
 router.route("/all").get(async (req, res) => {
   // Fetch all chats by userId
   const userId = req.user.id;
-  const chats = await prisma.aIChat.findMany({
+  const chats = await prisma.aiChat.findMany({
     where: { userId },
   });
   if (!chats) {
@@ -72,7 +72,7 @@ router.route("/all").get(async (req, res) => {
 router.route("/:chatId").get(async (req, res) => {
   // Fetch chat by chatId
   const chatId = req.params.chatId;
-  const chat = await prisma.aIChat.findUnique({
+  const chat = await prisma.aiChat.findUnique({
     where: { chatId },
   });
   if(!chat) {

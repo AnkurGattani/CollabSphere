@@ -22,7 +22,7 @@ model User {
   createdAt DateTime @default(now())
   messages    Message[]    // Relation to messages table
   roomUsers   RoomUser[]   // Relation to roomUsers table
-  aiChats    AIChat[] // Relation to AIChat table
+  aiChats    AiChat[] // Relation to AIChat table
 }
 
 model Room{
@@ -54,7 +54,7 @@ model RoomUser{
   @@unique([roomId, userId]) // Prevents duplicate user-room associations
 }
 
-model AIChat {
+model AiChat {
   chatId     String    @id @default(uuid())
   chatName  String
   userId     Int
