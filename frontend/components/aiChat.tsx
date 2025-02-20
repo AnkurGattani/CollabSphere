@@ -1,12 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { v4 as uuidv4 } from 'uuid';
 import { useAuthStore } from "../store/authStore"
-import { Send, Bot, User } from "lucide-react"
+import { Send, Bot, User, PlusCircle } from "lucide-react"
 import Header from "./Header"
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import Link from 'next/link'
+import { ScrollArea } from "@radix-ui/react-scroll-area"
+import { Button } from "./ui/button"
+import { useRouter } from 'next/navigation'
+import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 
 
 interface ChatPageProps {
@@ -21,6 +26,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   const token = localStorage.getItem('token');
   const userId = useAuthStore((state) => state.user?.id);
   const [loading,setLoading]=useState(true);
+  const router=useRouter();
   
   interface Chat {
     chatId: string;
@@ -42,7 +48,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
             }
           }
         );
-        console.log( response.data.data);
+        //console.log( response.data.data);
         setUserAIChats(response.data.data);
         // Sort chats by creation time in descending order
         const sortedChats = response.data.data.sort((a: Chat, b: Chat) => {
@@ -161,6 +167,11 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   
       return () => clearTimeout(timer);
     }, []);
+
+  const handleNewChat = async () => {
+    const chatId = uuidv4();
+    router.push(`/ai/chatroom/${chatId}`);
+  };
   
     if (loading) {
       return (
@@ -171,10 +182,10 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     }
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-white font-serif">
       <Header />
       <div className="flex flex-row flex-1 overflow-hidden">
-        <aside className="w-64 text-black p-4 border-r border-gray-400 overflow-y-auto">
+        {/* <aside className="w-64 text-black p-4 border-r border-gray-400 overflow-y-auto">
           <h2 className="text-lg font-semibold">Chats</h2>
           <ul className="mt-4 space-y-2">
             {userAIChats?.map((chat) => (
@@ -185,38 +196,34 @@ export default function ChatPage({ chatId }: ChatPageProps) {
               </li>
             ))}
           </ul>
-        </aside>
+        </aside> */}
+        <aside className="w-64 border-r border-border bg-muted">
+        <div className="p-4 flex justify-between items-center">
+          <h2 className="text-lg font-semibold">Chats</h2>
+          <Button className="bg-blue-600" size="icon"  aria-label="New Chat" onClick={handleNewChat}>
+            <PlusCircle className="h-5 w-5" />
+          </Button>
+        </div>
+        <ScrollArea className="h-[calc(100vh-5rem)]">
+          <div className="p-2 space-y-2">
+            {userAIChats?.map((chat, index) => (
+              <Link href={`/ai/chatroom/${chat.chatId}`} key={index}><Button  variant="ghost" className="w-full justify-start text-left hover:border-2 border-black ">
+                <span className="truncate">{chat.chatName.length > 25 ? `${chat.chatName.substring(0, 25)}...` : chat.chatName}</span>
+              </Button></Link>
+            ))}
+          </div>
+        </ScrollArea>
+      </aside>
         <div className="flex flex-col flex-1 overflow-y-auto">
           <main className="flex-1 overflow-auto p-4">
             <div className="max-w-3xl mx-auto space-y-4">
-            {messages && Array.isArray(messages) && messages.length > 0 && messages.map((m, index) => (
-              <div key={index} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`flex items-start space-x-2 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-              <div
-                className={`p-2 rounded-lg ${
-                m.role === "user" ? "bg-blue-500 text-white" : "bg-gray-100 text-black"
-                }`}
-              >
-                {m.role === "user" ? (
-                <p>{m.message}</p>
-                ) : (
-                <ReactMarkdown>{m.message}</ReactMarkdown>
-                )}
-              </div>
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                m.role === "user" ? "bg-blue-600" : "bg-gray-300"
-                }`}
-              >
-                {m.role === "user" ? (
-                <User className="w-5 h-5 text-white" />
-                ) : (
-                <Bot className="w-5 h-5 text-gray-600" />
-                )}
-              </div>
-              </div>
-              </div>
-              ))}
+            <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4">
+           {messages && messages.map((message, index) => {
+            return <ChatMessage key={index} role={message.role} content={message.message} />;
+          })}
+          </div>
+        </ScrollArea>
                 {isTyping && (
                 <div className="flex justify-start">
                   <div className="bg-gray-100 text-black p-2 rounded-lg flex items-center">
@@ -244,7 +251,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
                 disabled={isTyping}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-5 h-5 s" />
               </button>
             </form>
           </footer>
@@ -252,4 +259,22 @@ export default function ChatPage({ chatId }: ChatPageProps) {
       </div>
     </div>
   );
+}
+
+function ChatMessage({ role, content }: { role:string; content: string }) {
+  return (
+    <div className={`flex items-start space-x-2 ${role === "user" ? "justify-end" : "justify-start"}`}>
+      {role == "ai" && (
+        <Bot/>
+      )}
+      <div
+        className={`rounded-lg p-3 max-w-[70%] ${role === "user" ? "bg-blue-600 text-primary-foreground" : "bg-muted"}`}
+      >
+        <ReactMarkdown className="prose prose-sm">{content}</ReactMarkdown>
+      </div>
+      {role == "user" && (
+       <User/>
+      )}
+    </div>
+  )
 }
