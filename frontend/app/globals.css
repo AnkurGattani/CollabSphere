@@ -283,3 +283,14 @@ body {
     50%,100% {background-position: 100% 100%,50% 0,0 100%} 
 
 }
+
+/* ---break---*/
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
