@@ -11,7 +11,6 @@ import Link from 'next/link'
 import { ScrollArea } from "@radix-ui/react-scroll-area"
 import { Button } from "./ui/button"
 import { useRouter } from 'next/navigation'
-import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 
 
 interface ChatPageProps {
