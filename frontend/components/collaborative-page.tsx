@@ -115,60 +115,83 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-800 overflow-auto">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-blue-50 text-gray-800">
       <Header />
       {/* Room ID Section */}
-      <div className="flex justify-center items-center space-x-2 mb-4 mt-5">
-      <label className="text-sm font-bold text-gray-700">Room ID:</label>
-        <input
-          type="text"
-          value={roomId}
-          readOnly
-          className="p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-72"
-        />
-        <button
-          className={`px-3 py-2 rounded-md transition duration-300 ease-in-out text-sm ${
-            copySuccess ? 'bg-green-500 hover:bg-green-600' : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
-          }`}
-          onClick={handleCopyRoomId}
-        >
-          {copySuccess ? 'Copied!' : 'Copy'}
-        </button>
+      <div className="flex justify-center items-center space-x-2 mb-6 mt-5">
+        <div className="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-3 max-w-2xl w-full mx-4">
+          <label className="text-sm font-semibold text-gray-700">Room ID:</label>
+          <input
+            type="text"
+            value={roomId}
+            readOnly
+            className="flex-1 p-2 bg-gray-50 border border-blue-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono"
+          />
+          <button
+            className={`px-4 py-2 rounded-md transition-all duration-300 ease-in-out text-sm font-medium ${
+              copySuccess 
+              ? 'bg-green-500 text-white hover:bg-green-600' 
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+            onClick={handleCopyRoomId}
+          >
+            {copySuccess ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
       </div>
-      <div className="flex flex-col md:flex-row flex-grow overflow-hidden p-4 sm:p-6 lg:p-8 space-y-4 md:space-y-0 md:space-x-4">
+
+      <div className="flex flex-col md:flex-row flex-grow p-4 sm:p-6 lg:p-8 space-y-4 md:space-y-0 md:space-x-6 min-h-0">
         {/* Editor Section */}
-        <div className="w-full md:w-3/4 flex flex-col">
-          <div className="bg-gray-100 rounded-lg flex-grow p-4">
+        <div className="w-full md:w-3/4 flex flex-col min-h-0">
+          <div className="bg-white rounded-lg shadow-sm border border-blue-100 flex-grow p-4 overflow-hidden">
             <Toolbar />
-            <Room>
-              <EditorComponent />
-            </Room>
+            <div className="h-[calc(100%-2rem)] overflow-auto">
+              <Room>
+                <EditorComponent />
+              </Room>
+            </div>
           </div>
         </div>
 
         {/* Chat Section */}
-        <div className="w-full md:w-1/4 flex flex-col">
-          <div className="flex-grow bg-gray-100 p-4 rounded-lg mb-4 overflow-y-auto">
-            {chatMessages.map((msg, index) => (
-              <div key={index} className="mb-2 text-sm">
-                <span className="font-bold">{msg.user}:</span> {msg.text}
+        <div className="w-full md:w-1/4 flex flex-col min-h-0">
+          <div className="flex-grow bg-white rounded-lg shadow-sm border border-blue-100 mb-4 flex flex-col h-[calc(100vh-20rem)]">
+            <h2 className="text-lg bg-blue-600 text-white rounded-t-lg font-semibold text-gray-800 p-4">Chat</h2>
+            <div className="p-2 overflow-y-auto flex-grow">
+              {chatMessages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`mb-3 p-3 rounded-lg ${
+                    msg.user === user?.id?.toString()
+                      ? 'bg-blue-500 text-white ml-4'
+                      : 'bg-gray-100 text-gray-800 mr-4'
+                  }`}
+                >
+                  <div className="font-medium text-sm mb-1">
+                   {user?.firstName}
+                  </div>
+                  <div className="text-sm break-words">{msg.text}</div>
+                </div>
+              ))}
+            </div>
+            <div className="p-3 border-t border-gray-100">
+              <div className="flex">
+                <input
+                  type="text"
+                  className="flex-grow p-2 bg-gray-50 border border-blue-100 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  placeholder="Type your message..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors duration-300 text-sm font-medium"
+                  onClick={handleSendMessage}
+                >
+                  Send
+                </button>
               </div>
-            ))}
-          </div>
-          <div className="flex">
-            <input
-              type="text"
-              className="flex-grow p-2 border border-blue-200 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              placeholder="Type your message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <button
-              className="px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-r-md hover:from-blue-600 hover:to-blue-700 transition duration-300 ease-in-out text-sm"
-              onClick={handleSendMessage}
-            >
-              Send
-            </button>
+            </div>
           </div>
         </div>
       </div>
