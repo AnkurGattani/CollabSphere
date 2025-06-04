@@ -12,7 +12,7 @@ import Footer from './Footer';
 const CollaborativePage = ({ roomId }: { roomId: string }) => {
   const user = useAuthStore((state) => state.user);
   const [message, setMessage] = useState('');
-  const [chatMessages, setChatMessages] = useState<{ id: string; user: string; text: string }[]>([]);
+  const [chatMessages, setChatMessages] = useState<{ id: string; user: string; firstName?: string; text: string }[]>([]);
   const { socketUrl, setSocketUrl } = useSocketStore();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -106,6 +106,49 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Add effect to fetch user names for messages
+  useEffect(() => {
+    const fetchUserNames = async () => {
+      try {
+        const userPromises = chatMessages.map(async (msg) => {
+          try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/users/getUserName`, {
+              params: {
+                id: msg.user
+              }
+            });
+            console.log(response);
+            return {
+              userId: msg.user,
+              firstName: response.data.data.name 
+            };
+          } catch (error) {
+            console.error(`Failed to fetch user name for ID ${msg.user}:`, error);
+            return { userId: msg.user, firstName: 'Anonymous' };
+          }
+        });
+
+        const userDetails = await Promise.all(userPromises);
+
+        setChatMessages(prevMessages => 
+          prevMessages.map(msg => {
+            const userDetail = userDetails.find(u => u.userId === msg.user);
+            return {
+              ...msg,
+              firstName: userDetail?.firstName
+            };
+          })
+        );
+      } catch (error) {
+        console.error('Error fetching user names:', error);
+      }
+    };
+
+    if (chatMessages.length > 0) {
+      fetchUserNames();
+    }
+  }, [chatMessages.length]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -167,10 +210,14 @@ const CollaborativePage = ({ roomId }: { roomId: string }) => {
                       : 'bg-gray-100 text-gray-800 mr-4'
                   }`}
                 >
-                  <div className="font-medium text-sm mb-1">
-                   {user?.firstName}
+                  <div className='flex flex-row gap-2'>
+                    <div className="font-medium text-sm mb-1">
+                      {msg.user === user?.id?.toString() 
+                        ? 'You'
+                        : msg.firstName || 'Anonymous'}:
+                    </div>
+                    <div className="text-sm break-words">{msg.text}</div>
                   </div>
-                  <div className="text-sm break-words">{msg.text}</div>
                 </div>
               ))}
             </div>

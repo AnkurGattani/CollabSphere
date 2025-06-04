@@ -145,9 +145,18 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const getUserName = asyncHandler(async (req, res) => {
+  // console.log('req.params:', req.params.id || req.query.id); // Debug print
+   const idParam = req.params.id || req.query.id;
+  if (!idParam) {
+    throw new ApiError(400, "User ID parameter is missing");
+  }
+  const userID = Number(idParam);
+  if (isNaN(userID) || !Number.isInteger(userID) || userID <= 0) {
+    throw new ApiError(400, "Invalid user ID");
+  }
   const user = await prisma.user.findUnique({
     where: {
-      id: req.user.id,
+      id: userID,
     },
   });
   if (!user) {
