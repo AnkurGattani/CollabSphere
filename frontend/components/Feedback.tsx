@@ -7,11 +7,36 @@ import man from '../public/man.jpg'
 import man2 from '../public/man2.png'
 
 const feedbacks = [
-  { name: 'John Doe', role: 'Project Manager', comment: 'ChatCollab has revolutionized our team communication!', avatar: man },
-  { name: 'Jane Smith', role: 'Software Developer', comment: 'The real-time editing feature is a game-changer.', avatar: man2 },
-  { name: 'Mike Johnson', role: 'IT Security Specialist', comment: 'Secure and efficient. Exactly what we needed.', avatar: man},
-  { name: 'Emily Brown', role: 'UX Designer', comment: 'Our productivity has skyrocketed since using ChatCollab.', avatar: man2 },
-  { name: 'Alex Lee', role: 'Product Owner', comment: 'The user interface is intuitive and beautiful.', avatar: man },
+  { 
+    name: 'Sarah Chen', 
+    role: 'Engineering Lead', 
+    comment: 'ChatCollab has transformed how our distributed team collaborates. The real-time features and intuitive interface have made remote work feel seamless.', 
+    avatar: man 
+  },
+  { 
+    name: 'David Martinez', 
+    role: 'Senior Product Manager', 
+    comment: 'The integrated AI features and collaborative tools have boosted our team\'s productivity by at least 40%. Best investment in our workflow this year.', 
+    avatar: man2 
+  },
+  { 
+    name: 'Rachel Thompson', 
+    role: 'DevOps Engineer', 
+    comment: 'Finally, a collaboration platform that understands developers. The code sharing and version control integration is exactly what we needed.', 
+    avatar: man
+  },
+  { 
+    name: 'James Wilson', 
+    role: 'UI/UX Team Lead', 
+    comment: 'ChatCollab\'s design system and component library have streamlined our design-to-development workflow significantly.', 
+    avatar: man2 
+  },
+  { 
+    name: 'Lisa Patel', 
+    role: 'Agile Coach', 
+    comment: 'The sprint planning and task management features have made our agile ceremonies much more effective. Our team loves the integrated retrospective tools.', 
+    avatar: man 
+  },
 ]
 
 export default function Feedback() {
@@ -55,7 +80,7 @@ export default function Feedback() {
           {[...feedbacks, ...feedbacks].map((feedback, index) => (
             <motion.div
               key={index}
-              className="flex-shrink-0 w-64 bg-white p-6 rounded-lg shadow-md border border-blue-100"
+              className="flex-shrink-0 w-64 bg-white p-6 rounded-lg shadow-md border border-blue-100 border-t-4 border-t-blue-500"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}

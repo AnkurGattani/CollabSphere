@@ -12,11 +12,11 @@ const footerLinks = [
 ]
 
 const socialLinks = [
-  { icon: Facebook, href: '#' },
-  { icon: Twitter, href: '#' },
-  { icon: Instagram, href: '#' },
-  { icon: Linkedin, href: '#' },
-  { icon: Github, href: '#' },
+  { icon: Facebook, href: 'https://www.facebook.com' },
+  { icon: Twitter, href: 'https://www.twitter.com' },
+  { icon: Instagram, href: 'https://www.instagram.com' },
+  { icon: Linkedin, href: 'https://www.linkedin.com' },
+  { icon: Github, href: 'https://www.github.com' },
 ]
 
 export default function Footer() {
@@ -52,6 +52,7 @@ export default function Footer() {
               <a
                 key={`${social.icon.name}-${index}`}
                 href={social.href}
+                target="_blank"
                 className="text-gray-400 hover:text-white transition-colors"
                 aria-label={`Follow us on ${social.icon.name}`}
               >
