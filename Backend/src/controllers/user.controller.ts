@@ -144,4 +144,17 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 });
 
-export { registerUser,loginUser,logoutUser };
+const getUserName = asyncHandler(async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: req.user.id,
+    },
+  });
+  if (!user) {
+    throw new ApiError(401, "Invalid Access");
+  }
+  const response = new ApiResponse(200, { name: user.firstName }, "User name fetched successfully");
+  res.status(200).json(response);
+});
+
+export { registerUser,loginUser,logoutUser,getUserName };
