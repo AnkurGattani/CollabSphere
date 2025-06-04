@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { v4 as uuidv4 } from 'uuid';
 import { useAuthStore } from "../store/authStore"
-import { Send, Bot, User, PlusCircle } from "lucide-react"
+import { Send, Bot, User, PlusCircle, Menu, X } from "lucide-react"
 import Header from "./Header"
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
@@ -26,6 +26,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   const userId = useAuthStore((state) => state.user?.id);
   const [loading,setLoading]=useState(true);
   const router=useRouter();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
   interface Chat {
     chatId: string;
@@ -34,6 +35,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   }
 
   const [userAIChats, setUserAIChats] = useState<Chat[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // fecth all the AIchats of the userId
   useEffect(() => {
@@ -62,6 +64,14 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     fetchChats();
   } ,[]);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -75,6 +85,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
         //console.log("fetching messga eof specific chat")
        //console.log(response.data.data.messages);
         setMessages(response.data.data.messages);
+        scrollToBottom();
       } catch (error) {
         console.error('Error fetching AI messages:', error);
       }
@@ -180,60 +191,79 @@ export default function ChatPage({ chatId }: ChatPageProps) {
       );
     }
 
+  // Function to toggle sidebar
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-white font-serif">
       <Header />
-      <div className="flex flex-row flex-1 overflow-hidden">
-        {/* <aside className="w-64 text-black p-4 border-r border-gray-400 overflow-y-auto">
-          <h2 className="text-lg font-semibold">Chats</h2>
-          <ul className="mt-4 space-y-2">
-            {userAIChats?.map((chat) => (
-              <li key={chat.chatId} className="flex justify-between">
-                <Link href={`/ai/chatroom/${chat.chatId}`} className="text-blue-500 hover:underline">
-                  {chat.chatName}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </aside> */}
-        <aside className="w-64 border-r border-border bg-muted">
-        <div className="p-4 flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Chats</h2>
-          <Button className="bg-blue-600" size="icon"  aria-label="New Chat" onClick={handleNewChat}>
-            <PlusCircle className="h-5 w-5" />
-          </Button>
-        </div>
-        <ScrollArea className="h-[calc(100vh-5rem)]">
-          <div className="p-2 space-y-2">
-            {userAIChats?.map((chat, index) => (
-              <Link href={`/ai/chatroom/${chat.chatId}`} key={index}><Button  variant="ghost" className="w-full justify-start text-left hover:border-2 border-black ">
-                <span className="truncate">{chat.chatName.length > 25 ? `${chat.chatName.substring(0, 25)}...` : chat.chatName}</span>
-              </Button></Link>
-            ))}
+      <div className="flex flex-row flex-1 overflow-hidden relative">
+        {/* Mobile menu button */}
+        <button 
+          onClick={toggleSidebar}
+          className="lg:hidden absolute top-4 left-4 z-50 p-2 rounded-md hover:bg-gray-100"
+        >
+          {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+
+        {/* Sidebar */}
+        <aside 
+          className={`${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } transform lg:translate-x-0 transition-transform duration-300 ease-in-out fixed lg:static lg:w-64 w-64 h-full border-r border-border bg-muted z-40`}
+        >
+          <div className="p-4 flex justify-end gap-20 items-center">
+            <h2 className="text-lg  font-semibold">Chats</h2>
+            <Button className="bg-blue-600" size="icon" aria-label="New Chat" onClick={handleNewChat}>
+              <PlusCircle className="h-5 w-5" />
+            </Button>
           </div>
-        </ScrollArea>
-      </aside>
-        <div className="flex flex-col flex-1 overflow-y-auto">
+          <ScrollArea className="h-[calc(100vh-5rem)]">
+            <div className="p-2 space-y-2">
+              {userAIChats?.map((chat, index) => (
+                <Link href={`/ai/chatroom/${chat.chatId}`} key={index}>
+                  <Button variant="ghost" className="w-full justify-start text-left hover:border-2 border-black" onClick={() => setIsSidebarOpen(false)}>
+                    <span className="truncate">{chat.chatName.length > 25 ? `${chat.chatName.substring(0, 25)}...` : chat.chatName}</span>
+                  </Button>
+                </Link>
+              ))}
+            </div>
+          </ScrollArea>
+        </aside>
+
+        {/* Overlay for mobile */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Main content */}
+        <div className="flex flex-col flex-1 overflow-y-auto w-full">
           <main className="flex-1 overflow-auto p-4">
             <div className="max-w-3xl mx-auto space-y-4">
-            <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-           {messages && messages.map((message, index) => {
-            return <ChatMessage key={index} role={message.role} content={message.message} />;
-          })}
-          </div>
-        </ScrollArea>
-                {isTyping && (
+              <ScrollArea className="flex-1 p-4">
+                <div className="space-y-4">
+                  {messages && messages.map((message, index) => {
+                    return <ChatMessage key={index} role={message.role} content={message.message} />;
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
+              {isTyping && (
                 <div className="flex justify-start">
                   <div className="bg-gray-100 text-black p-2 rounded-lg flex items-center">
-                  <svg className="animate-spin h-5 w-5 mr-3 text-black" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  AI is typing...
+                    <svg className="animate-spin h-5 w-5 mr-3 text-black" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    AI is typing...
                   </div>
                 </div>
-                )}
+              )}
             </div>
           </main>
           <footer className="bg-white border-t border-gray-200 p-4">
@@ -250,7 +280,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
                 disabled={isTyping}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                <Send className="w-5 h-5 s" />
+                <Send className="w-5 h-5" />
               </button>
             </form>
           </footer>
