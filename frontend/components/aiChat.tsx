@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { ScrollArea } from "@radix-ui/react-scroll-area"
 import { Button } from "./ui/button"
 import { useRouter } from 'next/navigation'
+import { GoogleGenAI } from "@google/genai";
 
 
 interface ChatPageProps {
@@ -101,39 +102,33 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     e.preventDefault();
     if (!input) return;
     setMessages((prev) => 
-      Array.isArray(prev) && prev.length === 0 
-      ? [{ id: Date.now().toString(), role: "user", message: input }] 
-      : [...(Array.isArray(prev) ? prev : []), { id: Date.now().toString(), role: "user", message: input }]
-    );
+          Array.isArray(prev) && prev.length === 0 
+          ? [{ role: "user", message: input }] 
+          : [...(Array.isArray(prev) ? prev : []), { role: "user", message: input }]
+        );
     setInput("");
     setIsTyping(true);
-   
-    // make an hugging face api call here
-    try{
-      const response= await axios.post('https://api-inference.huggingface.co/models/google/gemma-2-2b-it',
-        {
-          inputs:input
-        },
-        {
-          headers:{
-           ContentType:'application/json',
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY}`
-          }
-        });
-        console.log(response.data[0].generated_text);
-        setMessages((prev) => 
-          Array.isArray(prev) && prev.length === 0 
-            ? [{ id: Date.now().toString(), role: "bot", message: response.data[0].generated_text }] 
-            : [...(Array.isArray(prev) ? prev : []), { id: Date.now().toString(), role: "bot", message: response.data[0].generated_text }]
-        );
+   try
+   {
+    const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GOOGLE_GENAI_API_KEY });
+     const response = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents: input,
+  });
+  console.log(response.text);
+  const aiResponse = response?.text;
+  setMessages((prev) => 
+            Array.isArray(prev) && prev.length === 0 
+              ? [{ role: "bot", message: aiResponse ?? "" }] 
+              : [...(Array.isArray(prev) ? prev : []), { role: "bot", message: aiResponse ?? "" }]
+          );
         setIsTyping(false);
-        // make an api call to backend to save message in database
         const res= await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/ai/save`,
           {
             chatId:chatId,
             userId:userId,
             userMessage:input,
-            botMessage:response.data[0].generated_text
+            botMessage:aiResponse
           },
           {
             headers:{
@@ -145,8 +140,6 @@ export default function ChatPage({ chatId }: ChatPageProps) {
           {
             console.log("Error saving message");
           }
-
-            // Check if chatId is already in userAIChats
         const chatExists = userAIChats.some(chat => chat.chatId === chatId);
         if (!chatExists) {
             const newChat = {
@@ -161,7 +154,9 @@ export default function ChatPage({ chatId }: ChatPageProps) {
             });
             setUserAIChats(sortedChats);
         }
-    }catch(error){
+    
+   }
+    catch(error){
       if (axios.isAxiosError(error)) {
         console.error('Error fetching AI completion:', error.response?.data || error.message);
       } else {
