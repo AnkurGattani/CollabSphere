@@ -1,6 +1,31 @@
+'use client'
+import axios from 'axios';
 import { Check, X } from 'lucide-react'
+import Link from 'next/link';
+
+// Stripe plans list
+export const plans = [
+  {
+    link: 'https://buy.stripe.com/test_dRm4gybpH6Oq4cK8EwfEk01',
+    priceId: 'price_1RWTYDBBvcyNcUcPihRAB3kn',
+    price: 19.99,
+  }
+];
 
 export default function DetailedPricingPage() {
+
+  const makePayment = async() => {
+    const user = JSON.parse(localStorage.getItem("user") || '{}');
+    console.log(user);
+
+    const paymentURL = plans[0].link + '?prefilled_email=' + user?.email;
+
+    // window.open(paymentURL, '');
+    window.location.replace(paymentURL);
+
+    console.log(localStorage.user);
+  }
+
   return (
     <div className="min-h-screen bg-white text-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto md:p-12 p-6">
@@ -25,9 +50,11 @@ export default function DetailedPricingPage() {
                 <NotFeature>Dedicated customer support</NotFeature>
               </FeatureSection>
             </div>
+            <Link href="/">
             <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-300">
               Get Started for Free
             </button>
+            </Link>
           </div>
 
           {/* Premium (Upgraded) Version */}
@@ -50,7 +77,7 @@ export default function DetailedPricingPage() {
                 <Feature>Access to premium tutorials and documentation</Feature>
               </FeatureSection>
             </div>
-            <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300">
+            <button onClick={makePayment} className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300">
               Upgrade to Premium
             </button>
           </div>

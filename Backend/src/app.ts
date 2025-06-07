@@ -7,6 +7,8 @@ import { handleCreateRoom, handleJoinRoom, handleSendMessage } from './routes/ch
 import messagesRouter from "./routes/message.routes";
 import roomRouter from "./routes/room.routes";
 import aiTextCompletionRouter from "./routes/huggingface.route";
+import paymentRouter from "./routes/payment.route";
+import webhookRouter from "./routes/stripe.webhook.route"
 import { verifyJWT } from "./middlewares/auth.middleware";
 
 const app = express();
@@ -20,6 +22,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.use('/api/v1/webhook', webhookRouter);
 
 app.use(
   express.json({
@@ -114,10 +118,18 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/messages", messagesRouter);
 app.use("/api/v1/rooms", roomRouter);
 app.use("/api/v1/ai", verifyJWT, aiTextCompletionRouter);
+app.use("/api/v1/payment", paymentRouter);
+
+
+
 
 const port = process.env.PORT || 1234;
 server.listen(port, function () {
   console.log((new Date()) + `Server is listening on port ${port}`);
 });
 
+app.post("/test", express.raw({ type: "application/json" }), (req, res) => {
+  console.log("✅ Test webhook hit!");
+  res.status(200).send("OK");
+});
 export default app;

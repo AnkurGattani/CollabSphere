@@ -20,6 +20,7 @@ model User {
   email     String   @unique
   password  String  
   createdAt DateTime @default(now())
+  isSubscribed  Boolean   @default(false)  
   messages    Message[]    // Relation to messages table
   roomUsers   RoomUser[]   // Relation to roomUsers table
   aiChats    AiChat[] // Relation to AIChat table
