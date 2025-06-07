@@ -38,7 +38,7 @@ export default function PaymentSuccess() {
         </div>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Payment Successful!</h1>
         <p className="text-gray-600 mb-6">
-          You're now a Premim User at CollabSphere! Kindly head back to Dashboard to enjoy the features. 
+          You&apos;re now a Premim User at CollabSphere! Kindly head back to Dashboard to enjoy the features. 
         </p>
         <Link href="/">
           <Button className=" bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition">

@@ -1,5 +1,4 @@
 'use client'
-import axios from 'axios';
 import { Check, X } from 'lucide-react'
 import Link from 'next/link';
 
