@@ -168,4 +168,26 @@ const getUser = asyncHandler(async (req, res) => {
   res.status(200).json(response);
 });
 
-export { registerUser,loginUser,logoutUser,getUser };
+const getUserName = asyncHandler(async (req, res) => {
+  // console.log('req.params:', req.params.id || req.query.id); // Debug print
+   const idParam = req.params.id || req.query.id;
+  if (!idParam) {
+    throw new ApiError(400, "User ID parameter is missing");
+  }
+  const userID = Number(idParam);
+  if (isNaN(userID) || !Number.isInteger(userID) || userID <= 0) {
+    throw new ApiError(400, "Invalid user ID");
+  }
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userID,
+    },
+  });
+  if (!user) {
+    throw new ApiError(401, "Invalid Access");
+  }
+  const response = new ApiResponse(200, { name: user.firstName }, "User name fetched successfully");
+  res.status(200).json(response);
+});
+
+export { registerUser,loginUser,logoutUser,getUser,getUserName };
