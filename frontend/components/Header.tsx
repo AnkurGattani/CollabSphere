@@ -18,6 +18,7 @@ export default function Header() {
   const [lastname, setLastname] = useState('')
   const [login, setLogin] = useState('Login')
   const [signup, setIsSignup] = useState('Sign Up')
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isSignupOpen, setIsSignupOpen] = useState(false)
   const isLogin = useAuthStore((state) => state.isLogin)
@@ -27,11 +28,28 @@ export default function Header() {
   const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      setIsLogin(true)
+    const token = localStorage.getItem('token');
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+    if (token && storedUser) {
+      setIsLogin(true);
+      setIsSubscribed(storedUser.isSubscribed || false);
     }
-  }, [setIsLogin])
+  }, [setIsLogin]);
+
+  // const fetchSubscriptionStatus = async(email: String) => {
+  //   try {
+  //     const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/payment/checkSubscription`, {
+  //       params: { email },
+  //     });
+      
+  //     return res.data.isSubscribed;
+  //   } catch (error) {
+  //     console.error("Subscription check failed", error);
+  //     return false;
+  //   }
+  // }
+
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -49,6 +67,12 @@ export default function Header() {
         setIsLogin(true)
         setToken(accessToken)
         setUser(user)
+
+        const isUserSubscribed = user?.isSubscribed;
+        setIsSubscribed(isUserSubscribed);
+
+        user.isSubscribed = isUserSubscribed;
+        localStorage.setItem('user', JSON.stringify(user));
       }
     } catch (error) {
       console.log(error)
@@ -126,9 +150,19 @@ export default function Header() {
           )}
           {isLogin && (
             <>
-              <Button onClick={handleUpgrade} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">Upgrade</Button>
-              <Button onClick={handleLogout} className="bg-red-500 text-white hover:bg-red-600 transition-all duration-300">Logout</Button>
-            </>
+            {!isSubscribed ? (
+              <Button onClick={handleUpgrade} className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300">
+                Upgrade
+              </Button>
+            ):(
+              <Button className="bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300 cursor-default">
+                Premium User
+              </Button>
+            )}
+            <Button onClick={handleLogout} className="bg-red-500 text-white hover:bg-red-600 transition-all duration-300">
+              Logout
+            </Button>
+          </>
           )}
         </div>
       </nav>

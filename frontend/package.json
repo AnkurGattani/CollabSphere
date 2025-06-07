@@ -23,6 +23,7 @@
     "@radix-ui/react-scroll-area": "^1.2.3",
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.2",
+    "@stripe/stripe-js": "^7.3.1",
     "@tiptap/extension-collaboration": "^2.10.2",
     "@tiptap/extension-collaboration-cursor": "^2.10.2",
     "@tiptap/extension-font-family": "^2.10.2",

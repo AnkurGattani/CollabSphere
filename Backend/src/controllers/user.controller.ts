@@ -118,8 +118,8 @@ const loginUser= asyncHandler(async (req, res) => {
     secure: false,
     sameSite: "strict",
   });
-  // extract only id email first name and last name to send to the client
-  const newuser = {id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName};
+  // extract only id email first name and last name and premium user status to send to the client
+  const newuser = {id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, isSubscribed: user.isSubscribed};
 
 
 
@@ -144,7 +144,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 });
 
-const getUserName = asyncHandler(async (req, res) => {
+const getUser = asyncHandler(async (req, res) => {
   // console.log('req.params:', req.params.id || req.query.id); // Debug print
    const idParam = req.params.id || req.query.id;
   if (!idParam) {
@@ -162,8 +162,10 @@ const getUserName = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(401, "Invalid Access");
   }
-  const response = new ApiResponse(200, { name: user.firstName }, "User name fetched successfully");
+  // const response = new ApiResponse(200, { name: user.firstName }, "User name fetched successfully");
+  const response = new ApiResponse(200, { user }, "User fetched successfully");
+
   res.status(200).json(response);
 });
 
-export { registerUser,loginUser,logoutUser,getUserName };
+export { registerUser,loginUser,logoutUser,getUser };
