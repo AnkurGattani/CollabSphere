@@ -8,7 +8,6 @@ import Header from "./Header"
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import Link from 'next/link'
-import { ScrollArea } from "@radix-ui/react-scroll-area"
 import { Button } from "./ui/button"
 import { useRouter } from 'next/navigation'
 import { GoogleGenAI } from "@google/genai";
