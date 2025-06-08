@@ -101,67 +101,65 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input) return;
-    setMessages((prev) => 
-          Array.isArray(prev) && prev.length === 0 
-          ? [{ role: "user", message: input }] 
-          : [...(Array.isArray(prev) ? prev : []), { role: "user", message: input }]
-        );
+    
+    const userMessage = { role: "user", message: input };
+    setMessages(prevMessages => Array.isArray(prevMessages) ? [...prevMessages, userMessage] : [userMessage]);
+    const currentInput = input;
     setInput("");
     setIsTyping(true);
-   try
-   {
-    const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GOOGLE_GENAI_API_KEY });
-     const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: input,
-  });
-  console.log(response.text);
-  const aiResponse = response?.text;
-  setMessages((prev) => 
-            Array.isArray(prev) && prev.length === 0 
-              ? [{ role: "bot", message: aiResponse ?? "" }] 
-              : [...(Array.isArray(prev) ? prev : []), { role: "bot", message: aiResponse ?? "" }]
-          );
-        setIsTyping(false);
-        const res= await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/ai/save`,
-          {
-            chatId:chatId,
-            userId:userId,
-            userMessage:input,
-            botMessage:aiResponse
-          },
-          {
-            headers:{
-              Authorization: `Bearer ${token}`
-            }
-          });
-        
-          if(!res)
-          {
-            console.log("Error saving message");
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GOOGLE_GENAI_API_KEY });
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: currentInput,
+      });
+      
+      const aiResponse = response?.text;
+      const botMessage = { role: "bot", message: aiResponse ?? "" };
+      setMessages(prevMessages => Array.isArray(prevMessages) ? [...prevMessages, botMessage] : [botMessage]);
+      setIsTyping(false);
+
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/ai/save`,
+        {
+          chatId: chatId,
+          userId: userId,
+          userMessage: currentInput,
+          botMessage: aiResponse
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
-        const chatExists = userAIChats.some(chat => chat.chatId === chatId);
-        if (!chatExists) {
-            const newChat = {
-            chatId: chatId,
-            chatName: input,
-            createdAt: new Date(Date.now()).toISOString(),
-            };
-            const updatedChats = [...userAIChats, newChat];
-            // Sort chats by creation time in descending order
-            const sortedChats = updatedChats.sort((a, b) => {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            });
-            setUserAIChats(sortedChats);
-        }
-    
-   }
-    catch(error){
+        });
+
+      if (!res) {
+        console.log("Error saving message");
+      }
+
+      // Add chat to sidebar if it doesn't exist
+      const chatExists = userAIChats.some(chat => chat.chatId === chatId);
+      if (!chatExists) {
+        const newChat = {
+          chatId: chatId,
+          chatName: currentInput,
+          createdAt: new Date(Date.now()).toISOString(),
+        };
+        setUserAIChats(prev => {
+          const updatedChats = [...prev, newChat];
+          // Sort chats by creation time in descending order
+          return updatedChats.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        });
+      }
+    } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error fetching AI completion:', error.response?.data || error.message);
       } else {
         console.error('Error fetching AI completion:', error);
       }
+      setIsTyping(false);
     }
   };
 
@@ -174,8 +172,14 @@ export default function ChatPage({ chatId }: ChatPageProps) {
     }, []);
 
   const handleNewChat = async () => {
-    const chatId = uuidv4();
-    router.push(`/ai/chatroom/${chatId}`);
+    const newChatId = uuidv4();
+    // Reset messages for new chat
+    setMessages([]);
+    // Keep sidebar open on desktop, close only on mobile
+    if (window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
+    router.push(`/ai/chatroom/${newChatId}`);
   };
   
     if (loading) {
@@ -194,11 +198,11 @@ export default function ChatPage({ chatId }: ChatPageProps) {
   return (
     <div className="flex flex-col h-screen bg-white font-serif">
       <Header />
-      <div className="flex flex-row flex-1 overflow-hidden relative">
+      <div className="flex flex-row flex-1 overflow-hidden relative md:pt-5">
         {/* Mobile menu button */}
         <button 
           onClick={toggleSidebar}
-          className="lg:hidden absolute top-4 left-4 z-50 p-2 rounded-md hover:bg-gray-100"
+          className="lg:hidden fixed top-20 left-4 z-50 p-2 rounded-md hover:bg-gray-100 bg-white"
         >
           {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -207,47 +211,45 @@ export default function ChatPage({ chatId }: ChatPageProps) {
         <aside 
           className={`${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } transform lg:translate-x-0 transition-transform duration-300 ease-in-out fixed lg:static lg:w-64 w-64 h-full border-r border-border bg-muted z-40`}
+          } transform lg:translate-x-0 transition-transform duration-300 ease-in-out fixed lg:relative lg:w-64 w-72 h-[calc(100vh-4rem)] border-r border-border bg-muted z-40`}
         >
-          <div className="p-4 flex justify-end gap-20 items-center">
-            <h2 className="text-lg  font-semibold">Chats</h2>
+          <div className="p-4 flex justify-between items-center sticky top-0 bg-muted z-10 border-b">
+            <h2 className="text-lg font-semibold">Chats</h2>
             <Button className="bg-blue-600" size="icon" aria-label="New Chat" onClick={handleNewChat}>
               <PlusCircle className="h-5 w-5" />
             </Button>
           </div>
-          <ScrollArea className="h-[calc(100vh-5rem)]">
+          <div className="overflow-y-auto h-[calc(100%-4rem)]">
             <div className="p-2 space-y-2">
               {userAIChats?.map((chat, index) => (
                 <Link href={`/ai/chatroom/${chat.chatId}`} key={index}>
-                  <Button variant="ghost" className="w-full justify-start text-left hover:border-2 border-black" onClick={() => setIsSidebarOpen(false)}>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-left hover:bg-gray-100 truncate px-3 py-2" 
+                    onClick={() => {
+                      if (window.innerWidth < 1024) {
+                        setIsSidebarOpen(false);
+                      }
+                    }}
+                  >
                     <span className="truncate">{chat.chatName.length > 25 ? `${chat.chatName.substring(0, 25)}...` : chat.chatName}</span>
                   </Button>
                 </Link>
               ))}
             </div>
-          </ScrollArea>
+          </div>
         </aside>
 
-        {/* Overlay for mobile */}
-        {isSidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
-
         {/* Main content */}
-        <div className="flex flex-col flex-1 overflow-y-auto w-full">
-          <main className="flex-1 overflow-auto p-4">
-            <div className="max-w-3xl mx-auto space-y-4">
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages && messages.map((message, index) => {
-                    return <ChatMessage key={index} role={message.role} content={message.message} />;
-                  })}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
+        <div className="flex flex-col flex-1 min-w-0 w-full h-[calc(100vh-4rem)]"> {/* Added min-w-0 */}
+          <main className="flex-1 overflow-y-auto">
+            <div className="max-w-3xl mx-auto p-4 space-y-4">
+              <div className="space-y-4">
+                {messages && messages.map((message, index) => (
+                  <ChatMessage key={index} role={message.role} content={message.message} />
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
               {isTyping && (
                 <div className="flex justify-start">
                   <div className="bg-gray-100 text-black p-2 rounded-lg flex items-center">
@@ -261,7 +263,7 @@ export default function ChatPage({ chatId }: ChatPageProps) {
               )}
             </div>
           </main>
-          <footer className="bg-white border-t border-gray-200 p-4">
+          <footer className="bg-white border-t border-gray-200 p-4 sticky bottom-0">
             <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex space-x-4">
               <input
                 type="text"
